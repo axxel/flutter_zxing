@@ -23,8 +23,8 @@ Remove-Item -R "$zxingPath"
 mkdir -p "$zxingPath"
 
 # copy zxing
-Copy-Item -R "zxing-cpp-$zxing_version/core/" "$zxingPath"
-Copy-Item -R "zxing-cpp-$zxing_version/zxing.cmake" "$zxingPath/.."
+Copy-Item -R "zxing-cpp-$zxing_version/zxing-cpp-$zxing_version/core/" "$zxingPath"
+Copy-Item -R "zxing-cpp-$zxing_version/zxing-cpp-$zxing_version/zxing.cmake" "$zxingPath/.."
 
 # print success message for zxing
 Write-Output "ZXing $zxing_version has been successfully installed"
