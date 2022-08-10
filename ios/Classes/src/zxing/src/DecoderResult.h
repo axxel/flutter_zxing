@@ -22,9 +22,7 @@ class CustomData;
 
 class DecoderResult
 {
-	ByteArray _rawBytes;
 	Content _content;
-	int _numBits = 0;
 	std::string _ecLevel;
 	int _lineCount = 0;
 	StructuredAppendInfo _structuredAppend;
@@ -39,26 +37,21 @@ class DecoderResult
 public:
 	DecoderResult() = default;
 	DecoderResult(Error error) : _error(std::move(error)) {}
-	DecoderResult(ByteArray&& rawBytes, Content&& bytes) : _rawBytes(std::move(rawBytes)), _content(std::move(bytes))
-	{
-		_numBits = 8 * Size(_rawBytes);
-	}
+	DecoderResult(Content&& bytes) : _content(std::move(bytes)) {}
 
 	DecoderResult(DecoderResult&&) noexcept = default;
 	DecoderResult& operator=(DecoderResult&&) = default;
 
 	bool isValid(bool includeErrors = false) const
 	{
-		return _content.symbology.code != 0 && (!_error || includeErrors);
+		return includeErrors || (_content.symbology.code != 0 && !_error);
 	}
 
-	const ByteArray& rawBytes() const & { return _rawBytes; }
-	ByteArray&& rawBytes() && { return std::move(_rawBytes); }
 	const Content& content() const & { return _content; }
 	Content&& content() && { return std::move(_content); }
 
 	// to keep the unit tests happy for now:
-	std::wstring text() const { return _content.utf16(); }
+	std::wstring text() const { return _content.utfW(); }
 	std::string symbologyIdentifier() const { return _content.symbology.toString(false); }
 
 	// Simple macro to set up getter/setter methods that save lots of boilerplate.
@@ -76,7 +69,6 @@ public:
 	DecoderResult&& SETTER(const TYPE& v) && { _##GETTER = v; return std::move(*this); } \
 	DecoderResult&& SETTER(TYPE&& v) && { _##GETTER = std::move(v); return std::move(*this); }
 
-	ZX_PROPERTY(int, numBits, setNumBits)
 	ZX_PROPERTY(std::string, ecLevel, setEcLevel)
 	ZX_PROPERTY(int, lineCount, setLineCount)
 	ZX_PROPERTY(StructuredAppendInfo, structuredAppend, setStructuredAppend)

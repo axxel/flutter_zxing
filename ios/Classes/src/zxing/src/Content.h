@@ -6,6 +6,8 @@
 #pragma once
 
 #include "ByteArray.h"
+#include "CharacterSet.h"
+#include "DecodeHints.h"
 
 #include <string>
 #include <vector>
@@ -13,17 +15,16 @@
 namespace ZXing {
 
 enum class ECI : int;
-enum class CharacterSet;
 
 enum class ContentType { Text, Binary, Mixed, GS1, ISO15434, UnknownECI };
-enum class TextMode { Utf8, Utf8ECI, HRI, Hex, Escaped };
+enum class AIFlag : char { None, GS1, AIM };
 
 std::string ToString(ContentType type);
 
 struct SymbologyIdentifier
 {
-	char code = 0, modifier = 0;
-	int eciModifierOffset = 0;
+	char code = 0, modifier = 0, eciModifierOffset = 0;
+	AIFlag aiFlag = AIFlag::None;
 
 	std::string toString(bool hasECI = false) const
 	{
@@ -37,7 +38,7 @@ class Content
 	void ForEachECIBlock(FUNC f) const;
 
 	void switchEncoding(ECI eci, bool isECI);
-	std::wstring render(bool withECI) const;
+	std::string render(bool withECI) const;
 
 public:
 	struct Encoding
@@ -48,13 +49,12 @@ public:
 
 	ByteArray bytes;
 	std::vector<Encoding> encodings;
-	std::string defaultCharset;
-	std::string applicationIndicator;
 	SymbologyIdentifier symbology;
+	CharacterSet defaultCharset = CharacterSet::Unknown;
 	bool hasECI = false;
 
 	Content();
-	Content(ByteArray&& bytes, SymbologyIdentifier si, std::string ai = {});
+	Content(ByteArray&& bytes, SymbologyIdentifier si);
 
 	void switchEncoding(ECI eci) { switchEncoding(eci, true); }
 	void switchEncoding(CharacterSet cs);
@@ -76,8 +76,8 @@ public:
 	bool canProcess() const;
 
 	std::string text(TextMode mode) const;
-	std::wstring utf16() const { return render(false); }
-	std::string utf8() const { return text(TextMode::Utf8); }
+	std::wstring utfW() const; // utf16 or utf32 depending on the platform, i.e. on size_of(wchar_t)
+	std::string utf8() const { return render(false); }
 
 	ByteArray bytesECI() const;
 	CharacterSet guessEncoding() const;

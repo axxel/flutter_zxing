@@ -8,10 +8,10 @@
 #pragma once
 
 #include "BarcodeFormat.h"
+#include "CharacterSet.h"
 
-#include <string>
+#include <string_view>
 #include <utility>
-#include <vector>
 
 namespace ZXing {
 
@@ -22,7 +22,7 @@ namespace ZXing {
  * The difference is how to get to a threshold value T which results in a bit
  * value R = L <= T.
  */
-enum class Binarizer : unsigned char // needs to unsigned for the bitfield below to work, uint8_t fails as well
+enum class Binarizer : unsigned char // needs to be unsigned for the bitfield below to work, uint8_t fails as well
 {
 	LocalAverage,    ///< T = average of neighboring pixels for matrix and GlobalHistogram for linear (HybridBinarizer)
 	GlobalHistogram, ///< T = valley between the 2 largest peaks in the histogram (per line in linear case)
@@ -35,6 +35,15 @@ enum class EanAddOnSymbol : unsigned char // see above
 	Ignore,  ///< Ignore any Add-On symbol during read/scan
 	Read,    ///< Read EAN-2/EAN-5 Add-On symbol if found
 	Require, ///< Require EAN-2/EAN-5 Add-On symbol to be present
+};
+
+enum class TextMode : unsigned char // see above
+{
+	Plain,   ///< bytes() transcoded to unicode based on ECI info or guessed charset (the default mode prior to 2.0)
+	ECI,     ///< standard content following the ECI protocol with every character set ECI segment transcoded to unicode
+	HRI,     ///< Human Readable Interpretation (dependent on the ContentType)
+	Hex,     ///< bytes() transcoded to ASCII string of HEX values
+	Escaped, ///< Use the EscapeNonGraphical() function (e.g. ASCII 29 will be transcoded to "<GS>")
 };
 
 class DecodeHints
@@ -50,13 +59,14 @@ class DecodeHints
 	bool _returnErrors             : 1;
 	EanAddOnSymbol _eanAddOnSymbol : 2;
 	Binarizer _binarizer           : 2;
+	TextMode _textMode             : 3;
 
+	CharacterSet _characterSet   = CharacterSet::Unknown;
 	uint8_t _minLineCount        = 2;
 	uint8_t _maxNumberOfSymbols  = 0xff;
 	uint8_t _downscaleFactor     = 3;
 	uint16_t _downscaleThreshold = 500;
 	BarcodeFormats _formats      = BarcodeFormat::None;
-	std::string _characterSet;
 
 public:
 	// bitfields don't get default initialized to 0 before c++20
@@ -71,7 +81,8 @@ public:
 		  _returnCodabarStartEnd(0),
 		  _returnErrors(0),
 		  _eanAddOnSymbol(EanAddOnSymbol::Ignore),
-		  _binarizer(Binarizer::LocalAverage)
+		  _binarizer(Binarizer::LocalAverage),
+		  _textMode(TextMode::Plain)
 	{}
 
 #define ZX_PROPERTY(TYPE, GETTER, SETTER) \
@@ -111,9 +122,6 @@ public:
 	/// The maximum number of symbols (barcodes) to detect / look for in the image with ReadBarcodes
 	ZX_PROPERTY(uint8_t, maxNumberOfSymbols, setMaxNumberOfSymbols)
 
-	/// Specifies fallback character set to use instead of auto-detecting it (when applicable)
-	ZX_PROPERTY(std::string, characterSet, setCharacterSet)
-
 	/// If true, the Code-39 reader will try to read extended mode.
 	ZX_PROPERTY(bool, tryCode39ExtendedMode, setTryCode39ExtendedMode)
 
@@ -132,22 +140,17 @@ public:
 	/// Specify whether to ignore, read or require EAN-2/5 add-on symbols while scanning EAN/UPC codes
 	ZX_PROPERTY(EanAddOnSymbol, eanAddOnSymbol, setEanAddOnSymbol)
 
+	/// Specifies the TextMode that controls the return of the Result::text() function
+	ZX_PROPERTY(TextMode, textMode, setTextMode)
+
+	/// Specifies fallback character set to use instead of auto-detecting it (when applicable)
+	ZX_PROPERTY(CharacterSet, characterSet, setCharacterSet)
+	DecodeHints& setCharacterSet(std::string_view v)& { return _characterSet = CharacterSetFromString(v), *this; }
+	DecodeHints&& setCharacterSet(std::string_view v) && { return _characterSet = CharacterSetFromString(v), std::move(*this); }
+
 #undef ZX_PROPERTY
 
-	/// NOTE: used to affect FNC1 handling for Code 128 (aka GS1-128) but behavior now based on position of FNC1.
-	[[deprecated]] bool assumeGS1() const noexcept { return true; }
-	[[deprecated]] DecodeHints& setAssumeGS1(bool v [[maybe_unused]]) { return *this; }
-
-	/// NOTE: has not been in effect since at least 1.2 and no one noticed.
-	[[deprecated]] std::vector<int> allowedLengths() const noexcept { return {}; }
-	[[deprecated]] DecodeHints& setAllowedLengths(const std::vector<int> v [[maybe_unused]]) { return *this; }
-
-	/// NOTE: use validateCode39CheckSum
-	[[deprecated]] bool assumeCode39CheckDigit() const noexcept { return validateCode39CheckSum(); }
-	[[deprecated]] DecodeHints& setAssumeCode39CheckDigit(bool v) & { return setValidateCode39CheckSum(v); }
-
 	bool hasFormat(BarcodeFormats f) const noexcept { return _formats.testFlags(f) || _formats.empty(); }
-	[[deprecated]] bool hasNoFormat() const noexcept { return _formats.empty(); }
 };
 
 } // ZXing

@@ -6,7 +6,6 @@
 
 #include "PDFDetector.h"
 #include "BinaryBitmap.h"
-#include "DecodeStatus.h"
 #include "BitMatrix.h"
 #include "ZXNullable.h"
 #include "Pattern.h"
@@ -303,7 +302,6 @@ static std::list<std::array<Nullable<ResultPoint>, 8>> DetectBarcode(const BitMa
 	return barcodeCoordinates;
 }
 
-#ifdef ZX_FAST_BIT_STORAGE
 bool HasStartPattern(const BitMatrix& m, bool rotate90)
 {
 	constexpr FixedPattern<8, 17> START_PATTERN = { 8, 1, 1, 1, 1, 1, 1, 3 };
@@ -313,7 +311,7 @@ bool HasStartPattern(const BitMatrix& m, bool rotate90)
 	int end = rotate90 ? m.width() : m.height();
 
 	for (int r = ROW_STEP; r < end; r += ROW_STEP) {
-		m.getPatternRow(r, row, rotate90);
+		GetPatternRow(m, r, row, rotate90);
 
 		if (FindLeftGuard(row, minSymbolWidth, START_PATTERN, 2).isValid())
 			return true;
@@ -324,7 +322,6 @@ bool HasStartPattern(const BitMatrix& m, bool rotate90)
 
 	return false;
 }
-#endif
 
 /**
 * <p>Detects a PDF417 Code in an image. Only checks 0 and 180 degree rotations.</p>
@@ -335,7 +332,7 @@ bool HasStartPattern(const BitMatrix& m, bool rotate90)
 */
 Detector::Result Detector::Detect(const BinaryBitmap& image, bool multiple, bool tryRotate)
 {
-	// construct a 'dummy' shared pointer, just be able to pass it up the call chain in DecodeStatus
+	// construct a 'dummy' shared pointer, just be able to pass it up the call chain in DetectorResult
 	// TODO: reimplement PDF Detector
 	auto binImg = std::shared_ptr<const BitMatrix>(image.getBitMatrix(), [](const BitMatrix*){});
 	if (!binImg)
@@ -343,11 +340,10 @@ Detector::Result Detector::Detect(const BinaryBitmap& image, bool multiple, bool
 
 	Result result;
 
-	for (int rotate90 = false; rotate90 <= tryRotate && result.points.empty(); ++rotate90) {
-#if defined(ZX_FAST_BIT_STORAGE)
+	for (int rotate90 = 0; rotate90 <= static_cast<int>(tryRotate) && result.points.empty(); ++rotate90) {
 		if (!HasStartPattern(*binImg, rotate90))
 			continue;
-#endif
+
 		result.rotation = 90 * rotate90;
 		if (rotate90) {
 			auto newBits = std::make_shared<BitMatrix>(binImg->copy());

@@ -12,11 +12,9 @@
 #include "DMBitLayout.h"
 #include "DMDataBlock.h"
 #include "DMVersion.h"
-#include "DecodeStatus.h"
 #include "DecoderResult.h"
 #include "GenericGF.h"
 #include "ReedSolomonDecoder.h"
-#include "TextDecoder.h"
 #include "ZXAlgorithms.h"
 #include "ZXTestSupport.h"
 
@@ -336,10 +334,7 @@ DecoderResult Decode(ByteArray&& bytes, const bool isDMRE)
 				if (oneByte <= 128) { // ASCII data (ASCII value + 1)
 					result.push_back(upperShift(oneByte) - 1);
 				} else if (oneByte <= 229) { // 2-digit data 00-99 (Numeric Value + 130)
-					int value = oneByte - 130;
-					if (value < 10) // pad with '0' for single digit values
-						result.push_back('0');
-					result.append(std::to_string(value));
+					result.append(ToString(oneByte - 130, 2));
 				} else if (oneByte >= 242) { // Not to be used in ASCII encodation
 					// work around encoders that use unlatch to ASCII as last code word (ask upstream)
 					if (oneByte == 254 && bits.available() == 0)
@@ -354,10 +349,10 @@ DecoderResult Decode(ByteArray&& bytes, const bool isDMRE)
 	}
 
 	result.append(resultTrailer);
-	result.applicationIndicator = result.symbology.modifier == '2' ? "GS1" : "";
+	result.symbology.aiFlag = result.symbology.modifier == '2' ? AIFlag::GS1 : AIFlag::None;
 	result.symbology.modifier += isDMRE * 6;
 
-	return DecoderResult(std::move(bytes), std::move(result))
+	return DecoderResult(std::move(result))
 		.setError(std::move(error))
 		.setStructuredAppend(sai)
 		.setReaderInit(readerInit);
