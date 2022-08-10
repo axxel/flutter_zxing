@@ -2,7 +2,7 @@
 project="flutter_zxing"
 
 # Define the versions to download
-zxing_version="1.4.0"
+zxing_version="master"
 
 # Define the paths to the directories where the files will be installed
 projectPath="../../$project"
@@ -13,7 +13,7 @@ mkdir -p download
 cd download
 
 # Download the zxing source code and unzip it
-wget -O "zxing-cpp-$zxing_version.zip" "https://github.com/nu-book/zxing-cpp/archive/refs/tags/v$zxing_version.zip"
+wget -O "zxing-cpp-$zxing_version.zip" "https://github.com/nu-book/zxing-cpp/archive/refs/heads/$zxing_version.zip"
 unzip "zxing-cpp-$zxing_version.zip"
 
 # remove zxing from project
@@ -24,6 +24,7 @@ mkdir -p "$zxingPath"
 
 # copy zxing
 cp -R "zxing-cpp-$zxing_version/core/" "$zxingPath"
+cp -R "zxing-cpp-$zxing_version/zxing.cmake" "$zxingPath/.."
 
 # print success message for zxing
 echo "ZXing $zxing_version has been successfully installed"

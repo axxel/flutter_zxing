@@ -121,8 +121,7 @@ extern "C"
 
         code->format = Format(static_cast<int>(result.format()));
 
-        std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
-        std::string text = converter.to_bytes(result.text());
+        std::string text = result.text();
         code->text = new char[text.length() + 1];
         strcpy(code->text, text.c_str());
 
