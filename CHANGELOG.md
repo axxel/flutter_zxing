@@ -1,3 +1,11 @@
+## 0.7.4
+
+* updated readme
+
+## 0.7.3
+
+* encodeBarcode method now uses the named parameters instead of positional parameters
+
 ## 0.7.2
 
 * fixed case sensitive folder name issue in CMakeLists.txt (thanks to [@softkot](https://github.com/softkot))
