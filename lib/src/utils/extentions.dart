@@ -79,9 +79,10 @@ final Map<int, String> formatNames = <int, String>{
   Format.MaxiCode: 'MaxiCode',
   Format.PDF417: 'PDF417',
   Format.QRCode: 'QR Code',
+  Format.MicroQRCode: 'Micro QR Code',
   Format.UPCA: 'UPCA',
   Format.UPCE: 'UPCE',
-  Format.OneDCodes: 'OneD',
-  Format.TwoDCodes: 'TwoD',
+  Format.LinearCodes: 'Linear',
+  Format.MatrixCodes: 'Matrix',
   Format.Any: 'Any',
 };

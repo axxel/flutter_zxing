@@ -167,19 +167,19 @@ abstract class Format {
   /// < Used as a return value if no valid barcode has been detected
   static const int None = 0;
 
-  /// < Aztec (2D)
+  /// < Aztec
   static const int Aztec = 1;
 
-  /// < Codabar (1D)
+  /// < Codabar
   static const int Codabar = 2;
 
-  /// < Code39 (1D)
+  /// < Code39
   static const int Code39 = 4;
 
-  /// < Code93 (1D)
+  /// < Code93
   static const int Code93 = 8;
 
-  /// < Code128 (1D)
+  /// < Code128
   static const int Code128 = 16;
 
   /// < GS1 DataBar, formerly known as RSS 14
@@ -188,35 +188,38 @@ abstract class Format {
   /// < GS1 DataBar Expanded, formerly known as RSS EXPANDED
   static const int DataBarExpanded = 64;
 
-  /// < DataMatrix (2D)
+  /// < DataMatrix
   static const int DataMatrix = 128;
 
-  /// < EAN-8 (1D)
+  /// < EAN-8
   static const int EAN8 = 256;
 
-  /// < EAN-13 (1D)
+  /// < EAN-13
   static const int EAN13 = 512;
 
-  /// < ITF (Interleaved Two of Five) (1D)
+  /// < ITF (Interleaved Two of Five)
   static const int ITF = 1024;
 
-  /// < MaxiCode (2D)
+  /// < MaxiCode
   static const int MaxiCode = 2048;
 
-  /// < PDF417 (1D) or (2D)
+  /// < PDF417
   static const int PDF417 = 4096;
 
-  /// < QR Code (2D)
+  /// < QR Code
   static const int QRCode = 8192;
 
-  /// < UPC-A (1D)
+  /// < UPC-A
   static const int UPCA = 16384;
 
-  /// < UPC-E (1D)
+  /// < UPC-E
   static const int UPCE = 32768;
-  static const int OneDCodes = 51070;
-  static const int TwoDCodes = 14465;
-  static const int Any = 65535;
+
+  /// < Micro QR Code
+  static const int MicroQRCode = 65536;
+  static const int LinearCodes = 51070;
+  static const int MatrixCodes = 80001;
+  static const int Any = 131071;
 }
 
 /// @brief Pos is a position of a barcode in a image.
