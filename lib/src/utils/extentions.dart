@@ -45,6 +45,7 @@ extension CodeFormat on Format {
 
   static final List<int> writerFormats = <int>[
     Format.QRCode,
+    // Format.MicroQRCode,
     Format.DataMatrix,
     Format.Aztec,
     Format.PDF417,
