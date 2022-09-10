@@ -99,7 +99,7 @@ extern "C"
         {
             auto writer = MultiFormatWriter(BarcodeFormat(format)).setMargin(margin).setEccLevel(eccLevel).setEncoding(CharacterSet::UTF8);
             auto bitMatrix = writer.encode(TextUtfEncoding::FromUtf8(string(contents)), width, height);
-            result.data = ToMatrix<uint32_t>(bitMatrix).data();
+            result.data = ToMatrix<int8_t>(bitMatrix).data();
             result.length = bitMatrix.width() * bitMatrix.height();
             result.isValid = true;
         }

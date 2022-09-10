@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_zxing/flutter_zxing.dart';
@@ -61,6 +59,9 @@ class _DemoPageState extends State<DemoPage> {
             ListView(
               children: [
                 WriterWidget(
+                  messages: const Messages(
+                    createButton: 'Create Code',
+                  ),
                   onSuccess: (result, bytes) {
                     setState(() {
                       createdCodeBytes = bytes;
