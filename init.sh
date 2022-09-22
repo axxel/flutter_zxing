@@ -26,8 +26,15 @@ mkdir -p "$zxingPath"
 cp -R "zxing-cpp-$zxing_version/core/" "$zxingPath"
 cp -R "zxing-cpp-$zxing_version/zxing.cmake" "$zxingPath/.."
 
-# print success message for zxing
-echo "ZXing $zxing_version has been successfully installed"
+cd ..
+
+# install melos and dependencies
+dart pub global activate melos
+melos clean
+melos bootstrap
 
 # remove the downloaded files
-rm -R ../download
+rm -R download
+
+# print success message for zxing
+echo "ZXing $zxing_version has been successfully installed"

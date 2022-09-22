@@ -103,6 +103,11 @@ public:
 	bool isMirrored() const { return _isMirrored; }
 
 	/**
+	 * @brief isInverted is the symbol inverted / has reveresed reflectance (see DecodeHints::tryInvert)
+	 */
+	bool isInverted() const { return _isInverted; }
+
+	/**
 	 * @brief symbologyIdentifier Symbology identifier "]cm" where "c" is symbology code character, "m" the modifier.
 	 */
 	std::string symbologyIdentifier() const;
@@ -139,12 +144,18 @@ public:
 	bool readerInit() const { return _readerInit; }
 
 	/**
-	 * @brief How many lines have been detected with this code (applies only to linear symbologies)
+	 * @brief lineCount How many lines have been detected with this code (applies only to linear symbologies)
 	 */
 	int lineCount() const { return _lineCount; }
 
+	/**
+	 * @brief versionNumber QR Code or DataMatrix version number.
+	 */
+	int versionNumber() const { return _versionNumber; }
+
 	// only for internal use
 	void incrementLineCount() { ++_lineCount; }
+	void setIsInverted(bool v) { _isInverted = v; }
 	Result& setDecodeHints(DecodeHints hints);
 
 	bool operator==(const Result& o) const;
@@ -160,17 +171,13 @@ private:
 	StructuredAppendInfo _sai;
 	BarcodeFormat _format = BarcodeFormat::None;
 	int _lineCount = 0;
+	int _versionNumber = 0;
 	bool _isMirrored = false;
+	bool _isInverted = false;
 	bool _readerInit = false;
 };
 
 using Results = std::vector<Result>;
-
-// Consider this an internal function that can change/disappear anytime without notice
-inline Result FirstOrDefault(Results&& results)
-{
-	return results.empty() ? Result() : std::move(results.front());
-}
 
 /**
  * @brief Merge a list of Results from one Structured Append sequence to a single result
